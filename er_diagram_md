@@ -1,0 +1,373 @@
+# Create docs/ER-Diagram.md
+er_diagram_md = '''# Police FIR System — ER Diagram
+
+> **Database Design Document**  
+> Karnataka Police Department | Confidential
+
+---
+
+## Color Legend
+
+| Symbol | Meaning |
+|--------|---------|
+| **PK** | Primary Key — Uniquely identifies each record |
+| **FK** | Foreign Key — References Primary Key of another table |
+
+---
+
+## Table Definitions
+
+### CaseMaster
+
+Primary table for all FIR/case records.
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| CaseMasterID | INT | PK | Unique identifier for each FIR/case |
+| CrimeNo | VARCHAR | | Crime Number: `1 digit Case Category + 4 digit District ID + 4 digit PS ID + 4 digit Year + 5 digit Serial` |
+| CaseNo | VARCHAR | | Case Number: `YYYY + 5-digit serial` (last 9 digits from CrimeNo) |
+| CrimeRegisteredDate | DATE | | Date when FIR was registered |
+| PolicePersonID | INT | FK → Employee.EmployeeID | Officer who registered the FIR |
+| PoliceStationID | INT | FK → Unit.UnitID | Police station where FIR is registered |
+| CaseCategoryID | INT | FK → CaseCategory.CaseCategoryID | Category (FIR, UDR, PAR, Zero FIR) |
+| GravityOffenceID | INT | FK → GravityOffence.GravityOffenceID | Gravity level (Heinous/Non-Heinous) |
+| CrimeMajorHeadID | INT | FK → CrimeHead.CrimeHeadID | Major crime classification |
+| CrimeMinorHeadID | INT | FK → CrimeSubHead.CrimeSubHeadID | Minor crime sub-classification |
+| CaseStatusID | INT | FK → CaseStatusMaster.CaseStatusID | Current status |
+| CourtID | INT | FK → Court.CourtID | Court where case is being heard |
+| IncidentFromDate | DATETIME | | Start date/time of incident |
+| IncidentToDate | DATETIME | | End date/time of incident |
+| InfoReceivedPSDate | DATETIME | | When PS received information |
+| latitude | DECIMAL | | GPS latitude coordinate |
+| longitude | DECIMAL | | GPS longitude coordinate |
+| BriefFacts | NVARCHAR(MAX) | | Summary of the case |
+
+### ComplainantDetails
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| ComplainantID | INT | PK | Unique identifier |
+| CaseMasterID | INT | FK → CaseMaster | FIR/case filed by this complainant |
+| ComplainantName | VARCHAR | | Full name |
+| AgeYear | INT | | Age |
+| OccupationID | INT | FK → OccupationMaster | Occupation |
+| ReligionID | INT | FK → ReligionMaster | Religion |
+| CasteID | INT | FK → CasteMaster | Caste |
+| GenderID | INT | | Gender (M/F/T) |
+
+### Victim
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| VictimMasterID | INT | PK | Unique identifier |
+| CaseMasterID | INT | FK → CaseMaster | FIR/case this victim belongs to |
+| VictimName | VARCHAR | | Full name |
+| AgeYear | INT | | Age in years |
+| GenderID | INT | | Gender (M/F/T) |
+| VictimPolice | VARCHAR | | 1 if victim is police, else 0 |
+
+### Accused
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| AccusedMasterID | INT | PK | Unique identifier |
+| CaseMasterID | INT | FK → CaseMaster | FIR/case this accused is linked to |
+| AccusedName | VARCHAR | | Full name |
+| AgeYear | INT | | Age |
+| GenderID | INT | | Gender (M/F/T) |
+| PersonID | VARCHAR | | Accused sorting: A1, A2, A3... |
+
+### ArrestSurrender
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| ArrestSurrenderID | INT | PK | Unique identifier |
+| CaseMasterID | INT | FK → CaseMaster | Linked FIR/case |
+| ArrestSurrenderTypeID | INT | | Type: arrest or voluntary surrender |
+| ArrestSurrenderDate | DATE | | Date of arrest/surrender |
+| ArrestSurrenderStateId | INT | FK → State | State where occurred |
+| ArrestSurrenderDistrictId | INT | FK → District | District where occurred |
+| PoliceStationID | INT | FK → Unit | PS handling the arrest |
+| IOID | INT | FK → Employee | Investigating Officer |
+| CourtID | INT | FK → Court | Court where accused produced |
+| AccusedMasterID | INT | FK → Accused | Accused person linked |
+| IsAccused | BIT | | Flag: primary accused (0/1) |
+| IsComplainantAccused | BIT | | Flag: complainant also accused (0/1) |
+
+### ActSectionAssociation
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| CaseMasterID | INT | FK → CaseMaster | FIR/case this applies to |
+| ActID | INT | FK → Act.ActCode | Legal act |
+| SectionID | INT | FK → Section.SectionCode | Specific section |
+| ActOrderID | INT | | Display order of act |
+| SectionOrderID | INT | | Display order of section |
+
+### Act
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| ActCode | VARCHAR | PK | Unique code (e.g., IPC, NDPS) |
+| ActDescription | VARCHAR | | Full official name |
+| ShortName | VARCHAR | | Abbreviated name |
+| Active | BIT | | 1=Active, 0=Inactive |
+
+### Section
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| ActCode | VARCHAR | FK → Act | Parent act |
+| SectionCode | VARCHAR | | Section number (e.g., 302, 307) |
+| SectionDescription | VARCHAR | | Full description |
+| Active | BIT | | 1=Active, 0=Inactive |
+
+### CrimeHead
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| CrimeHeadID | INT | PK | Unique identifier |
+| CrimeGroupName | VARCHAR | | Name (e.g., Crimes Against Body) |
+| Active | BIT | | 1=Active, 0=Inactive |
+
+### CrimeSubHead
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| CrimeSubHeadID | INT | PK | Unique identifier |
+| CrimeHeadID | INT | FK → CrimeHead | Parent major crime head |
+| CrimeHeadName | VARCHAR | | Name (e.g., Murder, Robbery) |
+| SeqID | INT | | Display/sort sequence |
+
+### CrimeHeadActSection
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| CrimeHeadID | INT | FK → CrimeHead | Crime head |
+| ActCode | VARCHAR | FK → Act | Legal act |
+| SectionCode | VARCHAR | | Section code |
+
+### Court
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| CourtID | INT | PK | Unique identifier |
+| CourtName | VARCHAR | | Full name |
+| DistrictID | INT | FK → District | District location |
+| StateID | INT | FK → State | State location |
+| Active | BIT | | 1=Active, 0=Inactive |
+
+### District
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| DistrictID | INT | PK | Unique identifier |
+| DistrictName | VARCHAR | | Name |
+| StateID | INT | FK → State | Parent state |
+| Active | BIT | | 1=Active, 0=Inactive |
+
+### State
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| StateID | INT | PK | Unique identifier |
+| StateName | VARCHAR | | Name |
+| NationalityID | INT | | Nationality reference |
+| Active | BIT | | 1=Active, 0=Inactive |
+
+### Unit (Police Station)
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| UnitID | INT | PK | Unique identifier |
+| UnitName | VARCHAR | | Name of unit/PS |
+| TypeID | INT | FK → UnitType | Unit type/category |
+| ParentUnit | INT | | Parent unit (self-reference) |
+| NationalityID | INT | | Nationality reference |
+| StateID | INT | FK → State | State |
+| DistrictID | INT | FK → District | District |
+| Active | BIT | | 1=Active, 0=Inactive |
+
+### UnitType
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| UnitTypeID | INT | PK | Unique identifier |
+| UnitTypeName | VARCHAR | | Name (e.g., Police Station, Circle Office) |
+| CityDistState | VARCHAR | | Operational level |
+| Hierarchy | INT | | Hierarchy level (lower = higher authority) |
+| Active | BIT | | 1=Active, 0=Inactive |
+
+### Employee
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| EmployeeID | INT | PK | Unique identifier |
+| DistrictID | INT | FK → District | Posted district |
+| UnitID | INT | FK → Unit | Assigned unit |
+| RankID | INT | FK → Rank | Current rank |
+| DesignationID | INT | FK → Designation | Current designation |
+| KGID | VARCHAR | | Karnataka Government ID |
+| FirstName | VARCHAR | | First name |
+| EmployeeDOB | DATE | | Date of birth |
+| GenderID | INT | | Gender |
+| BloodGroupID | INT | | Blood group |
+| PhysicallyChallenged | BIT | | 1=Yes, 0=No |
+| AppointmentDate | DATE | | Date of appointment |
+
+### Rank
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| RankID | INT | PK | Unique identifier |
+| RankName | VARCHAR | | Name (e.g., Constable, Inspector, DSP) |
+| Hierarchy | INT | | Rank hierarchy (lower = higher) |
+| Active | BIT | | 1=Active, 0=Inactive |
+
+### Designation
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| DesignationID | INT | PK | Unique identifier |
+| DesignationName | VARCHAR | | Name (e.g., Investigating Officer, SHO) |
+| Active | BIT | | 1=Active, 0=Inactive |
+| SortOrder | INT | | Display sort order |
+
+### CaseCategory
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| CaseCategoryID | INT | PK | Unique identifier |
+| LookupValue | VARCHAR | | Category name (FIR, UDR, PAR, Zero FIR) |
+
+### GravityOffence
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| GravityOffenceID | INT | PK | Unique identifier |
+| LookupValue | VARCHAR | | Description (Heinous, Non-Heinous) |
+
+### ChargesheetDetails
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| CSID | INT | PK | Unique identifier |
+| CaseMasterID | INT | FK → CaseMaster | Linked FIR/case |
+| csdate | DATETIME | | Chargesheeted date |
+| cstype | CHAR | | A=Chargesheet, B=False Case, C=Undetected |
+| PolicePersonID | INT | FK → Employee | Officer |
+
+### CasteMaster
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| caste_master_id | INT | PK | Unique identifier |
+| castemastername | VARCHAR | | Name |
+
+### ReligionMaster
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| ReligionID | INT | PK | Unique identifier |
+| ReligionName | VARCHAR | | Name (Hindu, Muslim, Christian) |
+
+### OccupationMaster
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| OccupationID | INT | PK | Unique identifier |
+| OccupationName | VARCHAR | | Name (Farmer, Government Employee) |
+
+### CaseStatusMaster
+
+| Column | Type | Key | Description |
+|--------|------|-----|-------------|
+| CaseStatusID | INT | PK | Unique identifier |
+| CaseStatusName | VARCHAR | | Name (Under Investigation, Charge Sheeted, Closed) |
+
+---
+
+## Relationship Matrix
+
+### One-to-Many (Parent → Children)
+
+| Parent Table | Child Table | Description |
+|-------------|-------------|-------------|
+| CaseMaster | Victim | One FIR → Multiple victims |
+| CaseMaster | Accused | One FIR → Multiple accused |
+| CaseMaster | ArrestSurrender | One FIR → Multiple arrest events |
+| CaseMaster | ComplainantDetails | One FIR → Multiple complainants |
+| CaseMaster | ActSectionAssociation | One FIR → Multiple act-sections |
+| CaseMaster | ChargesheetDetails | One FIR → One chargesheet |
+| CrimeHead | CrimeSubHead | One major → Multiple sub-heads |
+| CrimeHead | CrimeHeadActSection | One head → Multiple act-sections |
+| Act | Section | One act → Multiple sections |
+| Act | CrimeHeadActSection | One act → Multiple crime heads |
+| Court | CaseMaster | One court → Multiple cases |
+| District | Court | One district → Multiple courts |
+| District | Unit | One district → Multiple units |
+| District | Employee | One district → Multiple employees |
+| State | District | One state → Multiple districts |
+| State | Unit | One state → Multiple units |
+| Unit | Employee | One unit → Multiple employees |
+| UnitType | Unit | One type → Multiple units |
+| Rank | Employee | One rank → Multiple employees |
+| Designation | Employee | One designation → Multiple employees |
+
+### Many-to-One (Child → Parent)
+
+| Child Table | Parent Table | Description |
+|-------------|-------------|-------------|
+| CaseMaster | CaseCategory | Many FIRs → Same category |
+| CaseMaster | GravityOffence | Many FIRs → Same gravity |
+| CaseMaster | CrimeHead | Many FIRs → Same major head |
+| CaseMaster | CrimeSubHead | Many FIRs → Same sub-head |
+| CaseMaster | CaseStatusMaster | Many FIRs → Same status |
+| CaseMaster | Court | Many FIRs → Same court |
+| CaseMaster | Employee | Many FIRs → Same registering officer |
+| ArrestSurrender | State | Many arrests → Same state |
+| ArrestSurrender | District | Many arrests → Same district |
+| ArrestSurrender | Court | Many arrests → Same court |
+| ArrestSurrender | Employee | Many arrests → Same IO |
+| ComplainantDetails | OccupationMaster | Many complainants → Same occupation |
+| ComplainantDetails | ReligionMaster | Many complainants → Same religion |
+| ComplainantDetails | CasteMaster | Many complainants → Same caste |
+| ActSectionAssociation | Act | Many associations → Same act |
+| ActSectionAssociation | Section | Many associations → Same section |
+
+---
+
+> **Karnataka Police Department | Confidential**
+'''
+
+with open(f"{base_dir}/docs/ER-Diagram.md", "w") as f:
+    f.write(er_diagram_md)
+
+# Create LICENSE file
+license_content = '''MIT License
+
+Copyright (c) 2026 Karnataka State Police Department
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+'''
+
+with open(f"{base_dir}/LICENSE", "w") as f:
+    f.write(license_content)
+
+print("✅ docs/ER-Diagram.md and LICENSE created")
