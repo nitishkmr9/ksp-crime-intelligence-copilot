@@ -1,0 +1,168 @@
+# Create src/components/NetworkPanel.tsx
+network_panel = '''import { useState } from 'react'
+import { Share2 } from 'lucide-react'
+import { COLORS, TYPOGRAPHY } from '@/utils/constants'
+import { CaseRow } from './CaseRow'
+import { NODES, EDGES, CASES } from '@/data/cases'
+
+/**
+ * Network graph panel showing accused relationships
+ */
+export function NetworkPanel() {
+  const [selected, setSelected] = useState('ramesh')
+  const node = NODES.find((n) => n.id === selected)
+  const linkedCount = EDGES.filter(
+    ([a, b]) => a === selected || b === selected
+  ).length
+
+  if (!node) return null
+
+  return (
+    <div className="flex h-full">
+      {/* Graph Area */}
+      <div className="flex-1 relative overflow-hidden">
+        <svg viewBox="0 0 560 340" className="w-full h-full">
+          {/* Edges */}
+          {EDGES.map(([a, b], i) => {
+            const na = NODES.find((n) => n.id === a)
+            const nb = NODES.find((n) => n.id === b)
+            if (!na || !nb) return null
+            const bothCluster = na.cluster && nb.cluster
+            return (
+              <line
+                key={i}
+                x1={na.x}
+                y1={na.y}
+                x2={nb.x}
+                y2={nb.y}
+                stroke={
+                  bothCluster
+                    ? 'rgba(245,166,35,0.55)'
+                    : 'rgba(124,136,150,0.35)'
+                }
+                strokeWidth={bothCluster ? 1.6 : 1}
+              />
+            )
+          })}
+
+          {/* Nodes */}
+          {NODES.map((n) => (
+            <g
+              key={n.id}
+              onClick={() => setSelected(n.id)}
+              style={{ cursor: 'pointer' }}
+            >
+              {n.cluster && (
+                <circle
+                  cx={n.x}
+                  cy={n.y}
+                  r={n.size + 8}
+                  fill="none"
+                  stroke={COLORS.amber}
+                  strokeOpacity={0.35}
+                >
+                  <animate
+                    attributeName="r"
+                    values={`${n.size + 6};${n.size + 12};${n.size + 6}`}
+                    dur="2.4s"
+                    repeatCount="indefinite"
+                  />
+                  <animate
+                    attributeName="stroke-opacity"
+                    values="0.5;0.1;0.5"
+                    dur="2.4s"
+                    repeatCount="indefinite"
+                  />
+                </circle>
+              )}
+              <circle
+                cx={n.x}
+                cy={n.y}
+                r={n.size}
+                fill={
+                  n.cluster
+                    ? 'rgba(245,166,35,0.18)'
+                    : 'rgba(34,211,200,0.12)'
+                }
+                stroke={
+                  selected === n.id
+                    ? COLORS.text
+                    : n.cluster
+                      ? COLORS.amber
+                      : COLORS.cyan
+                }
+                strokeWidth={selected === n.id ? 2 : 1.4}
+              />
+              <text
+                x={n.x}
+                y={n.y + n.size + 14}
+                textAnchor="middle"
+                fontSize="10"
+                fill={COLORS.muted}
+                style={TYPOGRAPHY.mono}
+              >
+                {n.label}
+              </text>
+            </g>
+          ))}
+        </svg>
+
+        {/* Cluster Alert */}
+        <div
+          className="absolute top-3 left-3 px-2.5 py-1.5 rounded text-xs flex items-center gap-1.5"
+          style={{
+            background: 'rgba(245,166,35,0.1)',
+            border: '1px solid rgba(245,166,35,0.4)',
+            color: COLORS.amber,
+            ...TYPOGRAPHY.mono,
+          }}
+        >
+          <Share2 size={12} /> Repeat-offender cluster detected — 5 linked
+          identities
+        </div>
+      </div>
+
+      {/* Sidebar */}
+      <div
+        className="w-56 shrink-0 p-4 space-y-3"
+        style={{
+          borderLeft: `1px solid ${COLORS.border}`,
+          background: COLORS.panel,
+        }}
+      >
+        <div
+          className="text-xs uppercase tracking-wide"
+          style={{ color: COLORS.muted, ...TYPOGRAPHY.mono }}
+        >
+          Selected node
+        </div>
+        <div className="text-lg" style={{ color: COLORS.text, ...TYPOGRAPHY.sans }}>
+          {node.label}
+        </div>
+        <div
+          className="text-xs"
+          style={{
+            color: node.cluster ? COLORS.amber : COLORS.cyan,
+            ...TYPOGRAPHY.mono,
+          }}
+        >
+          {node.cluster ? 'flagged · repeat pattern' : 'no prior pattern'}
+        </div>
+        <div className="text-xs" style={{ color: COLORS.muted }}>
+          {linkedCount} direct connections
+        </div>
+        <div className="pt-2 space-y-1.5">
+          {CASES.slice(0, node.cluster ? 3 : 1).map((c) => (
+            <CaseRow key={c.id} c={c} />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+'''
+
+with open(f"{base_dir}/src/components/NetworkPanel.tsx", "w") as f:
+    f.write(network_panel)
+
+print("✅ NetworkPanel.tsx created")
