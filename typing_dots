@@ -1,0 +1,64 @@
+# Create src/components/TypingDots.tsx
+typing_dots = '''import { COLORS } from '@/utils/constants'
+
+/**
+ * Animated typing indicator for AI responses
+ */
+export function TypingDots() {
+  return (
+    <span className="inline-flex gap-1 items-center">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="animate-ksp-blink"
+          style={{
+            width: 5,
+            height: 5,
+            borderRadius: 999,
+            background: COLORS.cyan,
+            animationDelay: `${i * 0.15}s`,
+          }}
+        />
+      ))}
+    </span>
+  )
+}
+'''
+
+with open(f"{base_dir}/src/components/TypingDots.tsx", "w") as f:
+    f.write(typing_dots)
+
+# Create src/components/Bubble.tsx
+bubble = '''import { COLORS, TYPOGRAPHY } from '@/utils/constants'
+import type { ReactNode } from 'react'
+
+interface BubbleProps {
+  children: ReactNode
+  ai?: boolean
+}
+
+/**
+ * Chat message bubble component
+ */
+export function Bubble({ children, ai = false }: BubbleProps) {
+  return (
+    <div className="flex justify-start">
+      <div
+        className="max-w-[85%] px-3 py-2.5 rounded-lg text-sm"
+        style={{
+          background: COLORS.panel,
+          border: `1px solid ${COLORS.border}`,
+          ...TYPOGRAPHY.sans,
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+'''
+
+with open(f"{base_dir}/src/components/Bubble.tsx", "w") as f:
+    f.write(bubble)
+
+print("✅ TypingDots.tsx and Bubble.tsx created")
