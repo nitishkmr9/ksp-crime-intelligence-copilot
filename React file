@@ -1,0 +1,7 @@
+
+# Read the uploaded React file
+with open("/mnt/agents/upload/user_pasted_clipboard_long_content_as_file_import_React,_{_useState,_useRef,_useEff1.txt", "r") as f:
+    react_code = f.read()
+
+print(f"React code length: {len(react_code)} characters")
+print("First 200 chars:", react_code[:200])
