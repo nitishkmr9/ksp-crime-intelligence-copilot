@@ -1,0 +1,115 @@
+# Create src/App.tsx
+app_tsx = '''import { useState } from 'react'
+import { ShieldCheck } from 'lucide-react'
+import { COLORS, TYPOGRAPHY } from '@/utils/constants'
+import { ChatPanel } from '@/components/ChatPanel'
+import { NetworkPanel } from '@/components/NetworkPanel'
+import { HotspotPanel } from '@/components/HotspotPanel'
+import type { TabId } from '@/utils/types'
+
+const TABS: { id: TabId; label: string }[] = [
+  { id: 'chat', label: 'Chat' },
+  { id: 'network', label: 'Network' },
+  { id: 'hotspot', label: 'Hotspot' },
+]
+
+/**
+ * KSP Crime Intelligence Copilot - Main Application
+ * GeoShield · Conversational Crime Intelligence Dashboard
+ */
+export default function App() {
+  const [tab, setTab] = useState<TabId>('chat')
+
+  return (
+    <div
+      className="w-full h-screen flex items-center justify-center p-4"
+      style={{ background: '#05070A' }}
+    >
+      <div
+        className="w-full max-w-4xl flex flex-col rounded-xl overflow-hidden"
+        style={{
+          height: 'min(88vh, 720px)',
+          background: COLORS.base,
+          border: `1px solid ${COLORS.border}`,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between px-4 py-3"
+          style={{
+            borderBottom: `1px solid ${COLORS.border}`,
+            background: COLORS.panel,
+          }}
+        >
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-7 h-7 rounded-md flex items-center justify-center"
+              style={{
+                background: 'rgba(34,211,200,0.12)',
+                border: `1px solid rgba(34,211,200,0.4)`,
+              }}
+            >
+              <ShieldCheck size={15} style={{ color: COLORS.cyan }} />
+            </div>
+            <div>
+              <div
+                className="text-sm"
+                style={{ color: COLORS.text, ...TYPOGRAPHY.sans }}
+              >
+                KSP Crime Database AI
+              </div>
+              <div
+                className="text-[11px]"
+                style={{ color: COLORS.muted, ...TYPOGRAPHY.mono }}
+              >
+                GeoShield · conversational crime intelligence
+              </div>
+            </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div
+            className="flex gap-1 p-1 rounded-lg"
+            style={{
+              background: COLORS.panelAlt,
+              border: `1px solid ${COLORS.border}`,
+            }}
+          >
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className="px-3 py-1.5 rounded-md text-xs transition-colors"
+                style={{
+                  background: tab === t.id ? COLORS.base : 'transparent',
+                  color: tab === t.id ? COLORS.text : COLORS.muted,
+                  border:
+                    tab === t.id
+                      ? `1px solid ${COLORS.border}`
+                      : '1px solid transparent',
+                  ...TYPOGRAPHY.sans,
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-h-0">
+          {tab === 'chat' && <ChatPanel />}
+          {tab === 'network' && <NetworkPanel />}
+          {tab === 'hotspot' && <HotspotPanel />}
+        </div>
+      </div>
+    </div>
+  )
+}
+'''
+
+with open(f"{base_dir}/src/App.tsx", "w") as f:
+    f.write(app_tsx)
+
+print("✅ App.tsx created")
