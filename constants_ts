@@ -1,0 +1,87 @@
+'''/**
+ * KSP Crime Intelligence Copilot - Design Tokens
+ * Color palette, typography, and theme constants
+ */
+
+export const COLORS = {
+  base: '#0A0E13',
+  panel: '#121820',
+  panelAlt: '#161D26',
+  border: '#212B36',
+  text: '#E7EDF3',
+  muted: '#7C8896',
+  cyan: '#22D3C8',
+  amber: '#F5A623',
+} as const
+
+export const TYPOGRAPHY = {
+  mono: {
+    fontFamily: 'ui-monospace, "IBM Plex Mono", SFMono-Regular, Menlo, monospace',
+  },
+  sans: {
+    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, sans-serif',
+  },
+} as const
+
+export type ColorKey = keyof typeof COLORS
+export type TypographyKey = keyof typeof TYPOGRAPHY
+'''
+
+with open(f"{base_dir}/src/utils/constants.ts", "w") as f:
+    f.write(constants_ts)
+
+# Create types
+types_ts = '''/**
+ * KSP Crime Intelligence Copilot - Type Definitions
+ */
+
+export interface CaseRecord {
+  id: string
+  title: string
+  status: 'Open' | 'Closed' | 'Under Investigation'
+  date: string
+  accused: string
+}
+
+export interface TrendData {
+  m: string
+  cases: number
+}
+
+export interface HeatCell {
+  r: number
+  c: number
+  v: number
+}
+
+export interface NetworkNode {
+  id: string
+  label: string
+  x: number
+  y: number
+  cluster: boolean
+  size: number
+}
+
+export type EdgeTuple = [string, string]
+
+export type Language = 'EN' | 'KN'
+
+export type TabId = 'chat' | 'network' | 'hotspot'
+
+export interface Message {
+  role: 'user' | 'ai'
+  text?: string
+  key?: string
+}
+
+export interface TabItem {
+  id: TabId
+  label: string
+}
+'''
+
+with open(f"{base_dir}/src/utils/types.ts", "w") as f:
+    f.write(types_ts)
+
+print("✅ src/utils/constants.ts and src/utils/types.ts created")
