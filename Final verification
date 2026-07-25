@@ -1,0 +1,48 @@
+
+import os
+
+base_dir = "/mnt/agents/output/ksp-crime-intelligence-copilot"
+
+# Final verification
+print("📁 FINAL PROJECT STRUCTURE")
+print("=" * 70)
+
+file_count = 0
+total_size = 0
+
+for root, dirs, files in os.walk(base_dir):
+    level = root.replace(base_dir, '').count(os.sep)
+    indent = '  ' * level
+    folder_name = os.path.basename(root)
+    if folder_name:
+        print(f'{indent}📂 {folder_name}/')
+    
+    subindent = '  ' * (level + 1)
+    for file in sorted(files):
+        file_path = os.path.join(root, file)
+        size = os.path.getsize(file_path)
+        total_size += size
+        file_count += 1
+        size_str = f"{size:,} bytes" if size < 1024 else f"{size/1024:.1f} KB"
+        print(f'{subindent}📄 {file} ({size_str})')
+
+print("\n" + "=" * 70)
+print(f"📊 Total Files: {file_count}")
+print(f"📊 Total Size: {total_size/1024:.1f} KB")
+print(f"📊 Project Path: {base_dir}")
+print("\n" + "=" * 70)
+print("\n🚀 DEPLOYMENT INSTRUCTIONS:")
+print("1. Go to https://github.com/new")
+print("2. Create repo: ksp-crime-intelligence-copilot")
+print("3. Run these commands:")
+print("""
+   cd ksp-crime-intelligence-copilot
+   git init
+   git add .
+   git commit -m "feat: initial commit"
+   git branch -M main
+   git remote add origin https://github.com/YOUR_ORG/ksp-crime-intelligence-copilot.git
+   git push -u origin main
+""")
+print("4. Enable GitHub Pages → Settings → Pages → GitHub Actions")
+print("5. Done! Auto-deploys on every push to main.")
