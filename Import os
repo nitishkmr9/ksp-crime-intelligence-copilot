@@ -1,0 +1,24 @@
+
+import os
+
+# Define the project structure
+project_name = "ksp-crime-intelligence-copilot"
+base_dir = f"/mnt/agents/output/{project_name}"
+
+# Create directory structure
+os.makedirs(f"{base_dir}/src/components", exist_ok=True)
+os.makedirs(f"{base_dir}/src/data", exist_ok=True)
+os.makedirs(f"{base_dir}/src/hooks", exist_ok=True)
+os.makedirs(f"{base_dir}/src/utils", exist_ok=True)
+os.makedirs(f"{base_dir}/src/styles", exist_ok=True)
+os.makedirs(f"{base_dir}/public", exist_ok=True)
+os.makedirs(f"{base_dir}/docs", exist_ok=True)
+os.makedirs(f"{base_dir}/.github/workflows", exist_ok=True)
+os.makedirs(f"{base_dir}/scripts", exist_ok=True)
+
+print("Directory structure created successfully!")
+print("\nTree structure:")
+for root, dirs, files in os.walk(base_dir):
+    level = root.replace(base_dir, '').count(os.sep)
+    indent = ' ' * 2 * level
+    print(f'{indent}{os.path.basename(root)}/')
