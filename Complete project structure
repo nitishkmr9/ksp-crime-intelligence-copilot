@@ -1,0 +1,32 @@
+
+import os
+
+base_dir = "/mnt/agents/output/ksp-crime-intelligence-copilot"
+
+# Verify all files exist and show complete tree
+print("📁 COMPLETE PROJECT STRUCTURE")
+print("=" * 60)
+
+file_count = 0
+total_size = 0
+
+for root, dirs, files in os.walk(base_dir):
+    level = root.replace(base_dir, '').count(os.sep)
+    indent = '  ' * level
+    folder_name = os.path.basename(root)
+    if folder_name:
+        print(f'{indent}📂 {folder_name}/')
+    
+    subindent = '  ' * (level + 1)
+    for file in sorted(files):
+        file_path = os.path.join(root, file)
+        size = os.path.getsize(file_path)
+        total_size += size
+        file_count += 1
+        size_str = f"{size:,} bytes" if size < 1024 else f"{size/1024:.1f} KB"
+        print(f'{subindent}📄 {file} ({size_str})')
+
+print("\n" + "=" * 60)
+print(f"📊 Total Files: {file_count}")
+print(f"📊 Total Size: {total_size/1024:.1f} KB")
+print(f"📊 Project Path: {base_dir}")
