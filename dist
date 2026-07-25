@@ -1,0 +1,4 @@
+npm run build
+git add dist/
+git commit -m "Add build output"
+git push origin main
