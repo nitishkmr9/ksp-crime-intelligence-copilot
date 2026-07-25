@@ -1,12 +1,14 @@
 
-# Create ESLint config
-eslint_config = """module.exports = {
+# Create .eslintrc.cjs
+eslint_config = '''module.exports = {
   root: true,
   env: { browser: true, es2020: true },
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react-hooks/recommended',
+    'plugin:react-refresh/recommended',
+    'prettier',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parser: '@typescript-eslint/parser',
@@ -16,46 +18,88 @@ eslint_config = """module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
-    // Prevent undefined variable usage
-    'no-undef': 'error',
-    // Prevent unused imports
-    '@typescript-eslint/no-unused-vars': ['error', { 
-      argsIgnorePattern: '^_',
-      varsIgnorePattern: '^_' 
-    }],
-    // Prevent any type usage
-    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'no-console': ['warn', { allow: ['error', 'warn'] }],
   },
 }
-"""
+'''
 
 with open(f"{base_dir}/.eslintrc.cjs", "w") as f:
     f.write(eslint_config)
 
-# Create Prettier config
-prettier_config = """{
+# Create .prettierrc
+prettier_config = '''{
   "semi": false,
   "singleQuote": true,
   "tabWidth": 2,
   "trailingComma": "es5",
   "printWidth": 100,
-  "endOfLine": "lf"
+  "bracketSpacing": true,
+  "arrowParens": "avoid"
 }
-"""
+'''
 
 with open(f"{base_dir}/.prettierrc", "w") as f:
     f.write(prettier_config)
 
-# Create PostCSS config
-postcss_config = """export default {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-}
-"""
+# Create .prettierignore
+prettier_ignore = '''dist
+node_modules
+*.lock
+*.log
+'''
 
-with open(f"{base_dir}/postcss.config.js", "w") as f:
-    f.write(postcss_config)
+with open(f"{base_dir}/.prettierignore", "w") as f:
+    f.write(prettier_ignore)
 
-print("✅ ESLint, Prettier, and PostCSS configs created")
+# Create .gitignore
+gitignore = '''# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build output
+dist
+dist-ssr
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage
+
+# Misc
+*.tsbuildinfo
+'''
+
+with open(f"{base_dir}/.gitignore", "w") as f:
+    f.write(gitignore)
+
+print("✅ .eslintrc.cjs, .prettierrc, .prettierignore, .gitignore created")
