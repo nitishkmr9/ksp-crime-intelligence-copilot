@@ -1,4 +1,6 @@
-'''{
+
+# Create TypeScript config files
+tsconfig_json = """{
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -19,22 +21,19 @@
     "paths": {
       "@/*": ["src/*"],
       "@components/*": ["src/components/*"],
+      "@pages/*": ["src/pages/*"],
       "@hooks/*": ["src/hooks/*"],
       "@utils/*": ["src/utils/*"],
-      "@data/*": ["src/data/*"],
-      "@styles/*": ["src/styles/*"]
+      "@styles/*": ["src/styles/*"],
+      "@assets/*": ["src/assets/*"]
     }
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
-'''
+"""
 
-with open(f"{base_dir}/tsconfig.json", "w") as f:
-    f.write(tsconfig_json)
-
-# Create tsconfig.node.json
-tsconfig_node_json = '''{
+tsconfig_node_json = """{
   "compilerOptions": {
     "composite": true,
     "skipLibCheck": true,
@@ -45,9 +44,12 @@ tsconfig_node_json = '''{
   },
   "include": ["vite.config.ts"]
 }
-'''
+"""
+
+with open(f"{base_dir}/tsconfig.json", "w") as f:
+    f.write(tsconfig_json)
 
 with open(f"{base_dir}/tsconfig.node.json", "w") as f:
     f.write(tsconfig_node_json)
 
-print("✅ tsconfig.json and tsconfig.node.json created")
+print("✅ TypeScript configs created")
