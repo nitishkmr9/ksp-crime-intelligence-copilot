@@ -1,0 +1,123 @@
+
+# Create src/components/CaseRow.tsx
+case_row = '''import { COLORS, TYPOGRAPHY } from '@/utils/constants'
+import type { CaseRecord } from '@/utils/types'
+
+interface CaseRowProps {
+  c: CaseRecord
+}
+
+/**
+ * Individual case row display component
+ */
+export function CaseRow({ c }: CaseRowProps) {
+  const isOpen = c.status === 'Open'
+
+  return (
+    <div
+      className="flex items-center justify-between px-2.5 py-1.5 rounded"
+      style={{
+        background: COLORS.panelAlt,
+        border: `1px solid ${COLORS.border}`,
+      }}
+    >
+      <div className="min-w-0">
+        <div
+          className="text-xs truncate"
+          style={{ color: COLORS.text, ...TYPOGRAPHY.sans }}
+        >
+          {c.title}
+        </div>
+        <div
+          className="text-[11px]"
+          style={{ color: COLORS.muted, ...TYPOGRAPHY.mono }}
+        >
+          {c.id} · {c.date}
+        </div>
+      </div>
+      <span
+        className="text-[10px] px-2 py-0.5 rounded-full shrink-0 ml-2"
+        style={{
+          color: isOpen ? COLORS.amber : COLORS.muted,
+          border: `1px solid ${isOpen ? 'rgba(245,166,35,0.5)' : COLORS.border}`,
+          background: isOpen ? 'rgba(245,166,35,0.08)' : 'transparent',
+          ...TYPOGRAPHY.mono,
+        }}
+      >
+        {c.status}
+      </span>
+    </div>
+  )
+}
+'''
+
+with open(f"{base_dir}/src/components/CaseRow.tsx", "w") as f:
+    f.write(case_row)
+
+# Create src/components/SourceChip.tsx
+source_chip = '''import { useState } from 'react'
+import { FileSearch, ChevronRight } from 'lucide-react'
+import { COLORS, TYPOGRAPHY } from '@/utils/constants'
+import type { CaseRecord } from '@/utils/types'
+
+interface SourceChipProps {
+  record: CaseRecord
+}
+
+/**
+ * Expandable source chip showing case provenance
+ */
+export function SourceChip({ record }: SourceChipProps) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className="mt-2">
+      <button
+        onClick={() => setOpen(!open)}
+        className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors hover:opacity-80"
+        style={{
+          color: COLORS.cyan,
+          background: 'rgba(34,211,200,0.08)',
+          border: `1px solid rgba(34,211,200,0.35)`,
+          ...TYPOGRAPHY.mono,
+        }}
+      >
+        <FileSearch size={12} />
+        {open ? 'Hide source' : 'View source'}
+        <ChevronRight
+          size={12}
+          style={{
+            transform: open ? 'rotate(90deg)' : 'none',
+            transition: 'transform 150ms',
+          }}
+        />
+      </button>
+      {open && (
+        <div
+          className="mt-2 p-3 rounded text-xs leading-relaxed"
+          style={{
+            background: COLORS.panelAlt,
+            border: `1px solid ${COLORS.border}`,
+            color: COLORS.muted,
+            ...TYPOGRAPHY.mono,
+          }}
+        >
+          <div style={{ color: COLORS.cyan }}>{record.id}</div>
+          <div className="mt-1">
+            {record.title} · {record.date} · status: {record.status}
+          </div>
+          <div className="mt-1" style={{ color: COLORS.text }}>
+            &ldquo;Record matched on accused_name = &ldquo;{record.accused}&rdquo; within
+            180-day case window.&rdquo;
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+'''
+
+with open(f"{base_dir}/src/components/SourceChip.tsx", "w") as f:
+    f.write(source_chip)
+
+print("✅ CaseRow.tsx and SourceChip.tsx created")
