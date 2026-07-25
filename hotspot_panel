@@ -1,0 +1,118 @@
+# Create src/components/HotspotPanel.tsx
+hotspot_panel = '''import { Flame } from 'lucide-react'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
+import { COLORS, TYPOGRAPHY } from '@/utils/constants'
+import { HEAT, TREND } from '@/data/cases'
+
+/**
+ * Hotspot density and trend analysis panel
+ */
+export function HotspotPanel() {
+  return (
+    <div className="flex h-full">
+      {/* Heat Map */}
+      <div className="flex-1 p-4 flex flex-col">
+        <div
+          className="text-xs uppercase tracking-wide mb-2"
+          style={{ color: COLORS.muted, ...TYPOGRAPHY.mono }}
+        >
+          Density — last 30 days
+        </div>
+        <div
+          className="flex-1 grid"
+          style={{
+            gridTemplateColumns: 'repeat(10, 1fr)',
+            gridTemplateRows: 'repeat(7, 1fr)',
+            gap: 3,
+          }}
+        >
+          {HEAT.map((cell, i) => (
+            <div
+              key={i}
+              style={{
+                background: `rgba(245,166,35,${Math.min(cell.v, 0.9).toFixed(2)})`,
+                border: `1px solid ${COLORS.border}`,
+                borderRadius: 3,
+              }}
+            />
+          ))}
+        </div>
+        <div
+          className="flex items-center gap-2 mt-3 text-xs"
+          style={{ color: COLORS.muted }}
+        >
+          <Flame size={13} style={{ color: COLORS.amber }} /> hotspot cluster:
+          Whitefield sector (14 incidents / 30d)
+        </div>
+      </div>
+
+      {/* Trend Chart */}
+      <div
+        className="w-72 shrink-0 p-4"
+        style={{
+          borderLeft: `1px solid ${COLORS.border}`,
+          background: COLORS.panel,
+        }}
+      >
+        <div
+          className="text-xs uppercase tracking-wide mb-2"
+          style={{ color: COLORS.muted, ...TYPOGRAPHY.mono }}
+        >
+          Case trend, 6 months
+        </div>
+        <ResponsiveContainer width="100%" height={160}>
+          <LineChart data={TREND}>
+            <CartesianGrid stroke={COLORS.border} vertical={false} />
+            <XAxis
+              dataKey="m"
+              stroke={COLORS.muted}
+              tick={{ fontSize: 11, fill: COLORS.muted }}
+              axisLine={{ stroke: COLORS.border }}
+              tickLine={false}
+            />
+            <YAxis
+              stroke={COLORS.muted}
+              tick={{ fontSize: 11, fill: COLORS.muted }}
+              axisLine={false}
+              tickLine={false}
+              width={24}
+            />
+            <Tooltip
+              contentStyle={{
+                background: COLORS.panelAlt,
+                border: `1px solid ${COLORS.border}`,
+                fontSize: 12,
+              }}
+              labelStyle={{ color: COLORS.text }}
+            />
+            <Line
+              type="monotone"
+              dataKey="cases"
+              stroke={COLORS.cyan}
+              strokeWidth={2}
+              dot={{ r: 3, fill: COLORS.cyan }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+        <div className="mt-3 text-xs" style={{ color: COLORS.muted }}>
+          Cases up <span style={{ color: COLORS.amber }}>+29%</span> since
+          February, concentrated in one sector.
+        </div>
+      </div>
+    </div>
+  )
+}
+'''
+
+with open(f"{base_dir}/src/components/HotspotPanel.tsx", "w") as f:
+    f.write(hotspot_panel)
+
+print("✅ HotspotPanel.tsx created")
