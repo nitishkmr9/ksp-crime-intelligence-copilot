@@ -1,0 +1,248 @@
+# Create src/components/ChatPanel.tsx
+chat_panel = '''import { useState, useRef, useEffect, useCallback } from 'react'
+import { Send, Globe2, Radio } from 'lucide-react'
+import { COLORS, TYPOGRAPHY } from '@/utils/constants'
+import { Bubble } from './Bubble'
+import { TypingDots } from './TypingDots'
+import { CaseRow } from './CaseRow'
+import { SourceChip } from './SourceChip'
+import { CASES, QUICK_PROMPTS, PLACEHOLDERS } from '@/data/cases'
+import type { Message, Language } from '@/utils/types'
+
+/**
+ * Chat interface panel with AI responses
+ */
+export function ChatPanel() {
+  const [lang, setLang] = useState<Language>('EN')
+  const [input, setInput] = useState('')
+  const [messages, setMessages] = useState<Message[]>([{ role: 'ai', key: 'intro' }])
+  const [typing, setTyping] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: 'smooth',
+    })
+  }, [messages, typing])
+
+  const respond = useCallback(
+    (userText: string) => {
+      setTyping(true)
+      setTimeout(() => {
+        setTyping(false)
+        const lower = userText.toLowerCase()
+        let reply: Message
+
+        if (lower.includes('open') || lower.includes('ತೆರೆದ')) {
+          reply = { role: 'ai', key: 'openOnly' }
+        } else if (lang === 'KN' || /[\u0C80-\u0CFF]/.test(userText)) {
+          reply = { role: 'ai', key: 'kannada' }
+        } else {
+          reply = { role: 'ai', key: 'cases' }
+        }
+
+        setMessages((m) => [...m, reply])
+      }, 950)
+    },
+    [lang]
+  )
+
+  const send = useCallback(
+    (text?: string) => {
+      const t = (text ?? input).trim()
+      if (!t) return
+      setMessages((m) => [...m, { role: 'user', text: t }])
+      setInput('')
+      respond(t)
+    },
+    [input, respond]
+  )
+
+  const quickPrompts = QUICK_PROMPTS[lang] ?? QUICK_PROMPTS['EN']
+  const placeholder = PLACEHOLDERS[lang] ?? PLACEHOLDERS['EN']
+
+  const renderAI = (msg: Message, idx: number) => {
+    if (msg.key === 'intro') {
+      return (
+        <Bubble ai>
+          <span style={{ color: COLORS.text }}>
+            Hello, Investigator. Ask me about any case, accused, or pattern — in
+            English or Kannada.
+          </span>
+        </Bubble>
+      )
+    }
+
+    if (msg.key === 'cases') {
+      return (
+        <Bubble ai>
+          <div style={{ color: COLORS.text }}>
+            Found <b>3 cases</b> linked to <b>Ramesh K.</b> in the last 6 months:
+          </div>
+          <div className="mt-2 space-y-1.5">
+            {CASES.map((c) => (
+              <CaseRow key={c.id} c={c} />
+            ))}
+          </div>
+          <SourceChip record={CASES[0]} />
+        </Bubble>
+      )
+    }
+
+    if (msg.key === 'openOnly') {
+      const openCases = CASES.filter((c) => c.status === 'Open')
+      return (
+        <Bubble ai>
+          <div style={{ color: COLORS.text }}>
+            Of those, <b>{openCases.length} are still open</b>:
+          </div>
+          <div className="mt-2 space-y-1.5">
+            {openCases.map((c) => (
+              <CaseRow key={c.id} c={c} />
+            ))}
+          </div>
+          <div className="mt-2 text-xs" style={{ color: COLORS.muted }}>
+            No repeated context needed — I kept track of the accused from your last
+            question.
+          </div>
+        </Bubble>
+      )
+    }
+
+    if (msg.key === 'kannada') {
+      return (
+        <Bubble ai>
+          <div style={{ color: COLORS.text }}>
+            3 ಪ್ರಕರಣಗಳು ಕಂಡುಬಂದಿವೆ, ಕಳೆದ 6 ತಿಂಗಳುಗಳಲ್ಲಿ ದಾಖಲಾಗಿವೆ.
+          </div>
+          <div className="mt-2 space-y-1.5">
+            {CASES.map((c) => (
+              <CaseRow key={c.id} c={c} />
+            ))}
+          </div>
+          <div className="mt-2 text-xs" style={{ color: COLORS.muted }}>
+            (Same underlying model — response generated natively in Kannada.)
+          </div>
+        </Bubble>
+      )
+    }
+
+    return null
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div
+        className="flex items-center justify-between px-4 py-2.5"
+        style={{ borderBottom: `1px solid ${COLORS.border}` }}
+      >
+        <div
+          className="flex items-center gap-2 text-xs"
+          style={{ color: COLORS.muted, ...TYPOGRAPHY.mono }}
+        >
+          <Radio size={13} style={{ color: COLORS.cyan }} />
+          session live · synthetic data only
+        </div>
+        <button
+          onClick={() => setLang(lang === 'EN' ? 'KN' : 'EN')}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition-colors hover:opacity-80"
+          style={{
+            border: `1px solid ${COLORS.border}`,
+            color: COLORS.text,
+            ...TYPOGRAPHY.mono,
+          }}
+        >
+          <Globe2 size={13} style={{ color: COLORS.cyan }} />
+          {lang === 'EN' ? 'English' : 'ಕನ್ನಡ'}
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
+      >
+        {messages.map((m, i) =>
+          m.role === 'user' ? (
+            <div key={i} className="flex justify-end">
+              <div
+                className="max-w-[80%] px-3 py-2 rounded-lg text-sm"
+                style={{
+                  background: '#1C2530',
+                  color: COLORS.text,
+                  ...TYPOGRAPHY.sans,
+                }}
+              >
+                {m.text}
+              </div>
+            </div>
+          ) : (
+            <div key={i}>{renderAI(m, i)}</div>
+          )
+        )}
+        {typing && (
+          <Bubble ai>
+            <TypingDots />
+          </Bubble>
+        )}
+      </div>
+
+      {/* Quick Prompts */}
+      <div
+        className="px-4 py-2 flex flex-wrap gap-2"
+        style={{ borderTop: `1px solid ${COLORS.border}` }}
+      >
+        {quickPrompts.map((p) => (
+          <button
+            key={p}
+            onClick={() => send(p)}
+            className="text-xs px-2.5 py-1.5 rounded-full text-left transition-colors hover:opacity-80"
+            style={{
+              background: COLORS.panelAlt,
+              color: COLORS.muted,
+              border: `1px solid ${COLORS.border}`,
+              ...TYPOGRAPHY.sans,
+            }}
+          >
+            {p}
+          </button>
+        ))}
+      </div>
+
+      {/* Input */}
+      <div
+        className="p-3 flex items-center gap-2"
+        style={{ borderTop: `1px solid ${COLORS.border}` }}
+      >
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && send()}
+          placeholder={placeholder}
+          className="flex-1 px-3 py-2 rounded-lg text-sm outline-none transition-colors focus:ring-1"
+          style={{
+            background: COLORS.panelAlt,
+            color: COLORS.text,
+            border: `1px solid ${COLORS.border}`,
+            ...TYPOGRAPHY.sans,
+          }}
+        />
+        <button
+          onClick={() => send()}
+          className="p-2 rounded-lg transition-opacity hover:opacity-80"
+          style={{ background: COLORS.cyan, color: '#04201D' }}
+        >
+          <Send size={16} />
+        </button>
+      </div>
+    </div>
+  )
+}
+'''
+
+with open(f"{base_dir}/src/components/ChatPanel.tsx", "w") as f:
+    f.write(chat_panel)
+
+print("✅ ChatPanel.tsx created")
