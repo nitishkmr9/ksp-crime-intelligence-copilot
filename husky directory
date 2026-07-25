@@ -1,0 +1,96 @@
+# Create .husky directory first
+os.makedirs(f"{base_dir}/.husky", exist_ok=True)
+os.makedirs(f"{base_dir}/src/test", exist_ok=True)
+
+# Create .husky/pre-commit
+husky_precommit = '''#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npx lint-staged
+'''
+
+with open(f"{base_dir}/.husky/pre-commit", "w") as f:
+    f.write(husky_precommit)
+
+os.chmod(f"{base_dir}/.husky/pre-commit", 0o755)
+
+# Create test file
+test_file = '''import { describe, it, expect } from 'vitest'
+import { CASES, TREND, HEAT, NODES, EDGES } from '@/data/cases'
+
+describe('Data Integrity', () => {
+  it('should have 3 case records', () => {
+    expect(CASES).toHaveLength(3)
+  })
+
+  it('should have valid trend data', () => {
+    expect(TREND).toHaveLength(6)
+    expect(TREND[0]).toHaveProperty('m')
+    expect(TREND[0]).toHaveProperty('cases')
+  })
+
+  it('should have heat grid with correct dimensions', () => {
+    expect(HEAT).toHaveLength(70) // 7 rows × 10 cols
+  })
+
+  it('should have network nodes', () => {
+    expect(NODES.length).toBeGreaterThan(0)
+    expect(EDGES.length).toBeGreaterThan(0)
+  })
+
+  it('should have valid case statuses', () => {
+    const validStatuses = ['Open', 'Closed', 'Under Investigation']
+    CASES.forEach((c) => {
+      expect(validStatuses).toContain(c.status)
+    })
+  })
+})
+'''
+
+with open(f"{base_dir}/src/data/cases.test.ts", "w") as f:
+    f.write(test_file)
+
+# Create vitest.config.ts
+vitest_config = '''import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: ['node_modules/', 'src/test/'],
+    },
+  },
+})
+'''
+
+with open(f"{base_dir}/vitest.config.ts", "w") as f:
+    f.write(vitest_config)
+
+# Create test setup file
+test_setup = '''import '@testing-library/jest-dom'
+'''
+
+with open(f"{base_dir}/src/test/setup.ts", "w") as f:
+    f.write(test_setup)
+
+# Create .env.example
+env_example = '''# KSP Crime Intelligence Copilot - Environment Variables
+# Copy this file to .env and fill in your values
+
+# API Configuration (for future backend integration)
+# VITE_API_BASE_URL=https://api.ksp.gov.in/v1
+# VITE_API_KEY=your_api_key_here
+
+# Feature Flags
+# VITE_ENABLE_ANALYTICS=true
+# VITE_ENABLE_REALTIME_UPDATES=false
+'''
+
+with open(f"{base_dir}/.env.example", "w") as f:
+    f.write(env_example)
+
+print("✅ All remaining files created successfully!")
