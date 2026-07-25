@@ -1,0 +1,94 @@
+'''/**
+ * KSP Crime Intelligence Copilot - Case Data
+ * Synthetic data for demonstration purposes
+ */
+
+import type { CaseRecord, TrendData, HeatCell, NetworkNode, EdgeTuple } from '@/utils/types'
+
+export const CASES: CaseRecord[] = [
+  { id: 'FIR-2026-0142', title: 'Theft — MG Road', status: 'Open', date: '12 Mar 2026', accused: 'Ramesh K.' },
+  { id: 'FIR-2026-0098', title: 'Assault — Vidyaranyapura', status: 'Closed', date: '01 Feb 2026', accused: 'Ramesh K.' },
+  { id: 'FIR-2025-1187', title: 'Burglary — Jayanagar', status: 'Open', date: '20 Dec 2025', accused: 'Ramesh K.' },
+]
+
+export const TREND: TrendData[] = [
+  { m: 'Feb', cases: 18 },
+  { m: 'Mar', cases: 22 },
+  { m: 'Apr', cases: 27 },
+  { m: 'May', cases: 24 },
+  { m: 'Jun', cases: 31 },
+  { m: 'Jul', cases: 29 },
+]
+
+// Fixed heat grid (row, col, intensity 0-1) — hand-placed hotspot cluster
+export const HEAT: HeatCell[] = (() => {
+  const rows = 7
+  const cols = 10
+  const hot = [
+    [2, 6], [2, 7], [3, 6], [3, 7], [3, 8], [4, 7],
+  ]
+  const grid: HeatCell[] = []
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const isHot = hot.some(([hr, hc]) => Math.abs(hr - r) <= 1 && Math.abs(hc - c) <= 1)
+      const dist = hot.reduce(
+        (min, [hr, hc]) => Math.min(min, Math.hypot(hr - r, hc - c)),
+        99
+      )
+      const intensity = Math.max(0, 1 - dist / 3.2)
+      grid.push({
+        r,
+        c,
+        v: isHot ? Math.max(intensity, 0.55) : intensity * 0.4,
+      })
+    }
+  }
+  return grid
+})()
+
+// Network nodes — hand-placed layout, cluster = repeat offenders
+export const NODES: NetworkNode[] = [
+  { id: 'ramesh', label: 'Ramesh K.', x: 300, y: 160, cluster: true, size: 22 },
+  { id: 'suresh', label: 'Suresh P.', x: 400, y: 110, cluster: true, size: 16 },
+  { id: 'anil', label: 'Anil M.', x: 410, y: 210, cluster: true, size: 16 },
+  { id: 'vijay', label: 'Vijay N.', x: 340, y: 250, cluster: true, size: 14 },
+  { id: 'deepak', label: 'Deepak S.', x: 480, y: 160, cluster: true, size: 14 },
+  { id: 'kumar', label: 'Kumar T.', x: 120, y: 90, cluster: false, size: 12 },
+  { id: 'raghav', label: 'Raghav J.', x: 90, y: 220, cluster: false, size: 12 },
+  { id: 'manoj', label: 'Manoj R.', x: 180, y: 300, cluster: false, size: 11 },
+  { id: 'sneha', label: 'Sneha V.', x: 520, y: 280, cluster: false, size: 11 },
+]
+
+export const EDGES: EdgeTuple[] = [
+  ['ramesh', 'suresh'],
+  ['ramesh', 'anil'],
+  ['ramesh', 'vijay'],
+  ['ramesh', 'deepak'],
+  ['suresh', 'anil'],
+  ['anil', 'deepak'],
+  ['ramesh', 'kumar'],
+  ['kumar', 'raghav'],
+  ['raghav', 'manoj'],
+  ['deepak', 'sneha'],
+]
+
+// Quick prompts by language
+export const QUICK_PROMPTS: Record<string, string[]> = {
+  EN: [
+    'Show all cases linked to Ramesh K. in the last 6 months',
+    'Which of these are still open?',
+  ],
+  KN: ['ಈ ಆರೋಪಿಗೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಪ್ರಕರಣಗಳನ್ನು ತೋರಿಸಿ'],
+}
+
+// Placeholder text by language
+export const PLACEHOLDERS: Record<string, string> = {
+  EN: 'Ask about a case, accused, or pattern…',
+  KN: 'ಪ್ರಕರಣ ಅಥವಾ ಆರೋಪಿಯ ಬಗ್ಗೆ ಕೇಳಿ…',
+}
+'''
+
+with open(f"{base_dir}/src/data/cases.ts", "w") as f:
+    f.write(cases_data)
+
+print("✅ src/data/cases.ts created")
